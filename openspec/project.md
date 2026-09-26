@@ -36,8 +36,8 @@ configuration, and any helper scripts deployed to the device.
 - Repo paths for device files should mirror their `/userdata` location
   (e.g. `userdata/system/batocera.conf`) so deployment is a straight copy.
 - Scripts target Batocera's shell (bash/busybox) and must be safe to re-run.
-- Commit messages: short imperative summary, conventional prefixes
-  (`docs:`, `feat:`, `fix:`, `chore:`) welcome.
+- Commit messages, PR titles, and merge/squash commits follow Conventional
+  Commits (`docs:`, `feat(scope):`, `fix(scope):`, `chore:`).
 
 ## Open Questions
 - Exact Minisforum model, CPU/GPU, RAM, storage layout (TBD).

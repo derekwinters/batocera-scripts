@@ -14,3 +14,6 @@ Rules:
   `/opsx:archive`, or edit `openspec/specs/` directly for simple fact corrections).
 - Don't guess unknown hardware details; mark them TBD in the specs.
 - Device files target `/userdata` on the Batocera host.
+- Always use [Conventional Commits](https://www.conventionalcommits.org) for
+  commit messages, PR titles, and merge/squash commit messages, e.g.
+  `docs: ...`, `feat(input): ...`, `fix(lightgun): ...`.
