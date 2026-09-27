@@ -1,0 +1,97 @@
+#!/bin/sh
+# arcade_stick_calibration - Batocera user service.
+#
+# Keeps the SDL axis calibration cache for the arcade kit USB encoders
+# (Baolian TS-UAIB-OP02, USB 32be:2000) at the known-good centred values.
+#
+# The encoders send no initial HID report, so until an input changes every
+# axis reads 0 (the minimum). If Batocera generates the cache then, it records
+# neutral as -32768 and a joystick used first after boot can stick in one
+# direction. Correct neutral for raw 127 on a 0..255 axis is -129.
+#
+# On start: if the cache is missing or differs from the known-good content,
+# rewrite it (temp file + mv). Other controllers' cache files are not touched.
+#
+# Enable with: batocera-services enable arcade_stick_calibration
+set -u
+
+NAME="arcade_stick_calibration"
+SDL2_DIR="${ARCADE_STICK_SDL2_DIR:-/userdata/system/.sdl2}"
+CACHE_FILE="${SDL2_DIR}/03000000be3200000020000011010000_Baolian industry Co., Ltd TS-UAIB-OP02.cache"
+
+# Known-good content: axis count, then the neutral value of each axis.
+write_known_good() {
+    printf '%s\n' 4 -129 -129 -129 -129
+}
+
+log() {
+    if command -v logger >/dev/null 2>&1; then
+        logger -t "$NAME" -- "$*"
+    else
+        echo "$NAME: $*"
+    fi
+}
+
+cache_ok() {
+    [ -f "$CACHE_FILE" ] || return 1
+    [ "$(cat "$CACHE_FILE" 2>/dev/null)" = "$(write_known_good)" ] || return 1
+    # $(...) strips trailing newlines, so also compare exact byte size.
+    [ "$(wc -c < "$CACHE_FILE" | tr -d ' ')" = "$(write_known_good | wc -c | tr -d ' ')" ]
+}
+
+do_start() {
+    if cache_ok; then
+        log "calibration cache already correct: $CACHE_FILE"
+        return 0
+    fi
+
+    if [ -e "$CACHE_FILE" ]; then
+        reason="wrong"
+    else
+        reason="missing"
+    fi
+
+    if ! mkdir -p "$SDL2_DIR"; then
+        log "error: cannot create $SDL2_DIR"
+        return 1
+    fi
+
+    tmp="${SDL2_DIR}/.${NAME}.$$.tmp"
+    if write_known_good > "$tmp" && mv -f "$tmp" "$CACHE_FILE"; then
+        log "calibration cache was $reason; restored centred values: $CACHE_FILE"
+        return 0
+    fi
+
+    rm -f "$tmp"
+    log "error: failed to write $CACHE_FILE"
+    return 1
+}
+
+do_status() {
+    if cache_ok; then
+        echo "$NAME: calibration cache correct"
+        return 0
+    fi
+    echo "$NAME: calibration cache missing or wrong: $CACHE_FILE"
+    return 1
+}
+
+case "${1:-}" in
+    start)
+        do_start
+        ;;
+    stop)
+        # Nothing to stop; the service only acts at start.
+        exit 0
+        ;;
+    restart)
+        do_start
+        ;;
+    status)
+        do_status
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}" >&2
+        exit 1
+        ;;
+esac
