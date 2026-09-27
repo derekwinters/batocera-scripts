@@ -8,7 +8,7 @@
 - [x] 2.1 Copy `timecris.cfg` to `/userdata/system/configs/mame/timecris.cfg` on the arcade
 - [x] 2.2 Set `timecris` to run on standalone MAME: `mame["timecris.zip"].emulator=mame` and `mame["timecris.zip"].core=mame` in `/userdata/system/batocera.conf` (or EmulationStation > game > Advanced game options > Emulator)
 - [x] 2.3 Add `namcoc71.zip` (`c71.bin`) to `/userdata/roms/mame`
-- [ ] 2.4 Check the set with `/usr/bin/mame/mame -rompath /userdata/roms/mame -verifyroms timecris` and confirm "romset timecris is good"
+- [x] 2.4 Check the set with `/usr/bin/mame/mame -rompath /userdata/roms/mame -verifyroms timecris` and confirm "romset timecris is good"
 
 ## 3. On-device verification
 
